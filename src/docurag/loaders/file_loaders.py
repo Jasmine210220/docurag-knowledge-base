@@ -6,7 +6,7 @@ from langchain_community.document_loaders import (
     TextLoader,
 )
 
-from src.kb_rag.loaders.base import BaseDocumentLoader
+from src.docurag.loaders.base import BaseDocumentLoader
 
 
 class TextDocumentLoader(BaseDocumentLoader):

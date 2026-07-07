@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from src.kb_rag.config import RAW_DATA_DIR, VECTOR_STORE_DIR, load_settings
-from src.kb_rag.loaders import load_documents_from_directory
+from src.docurag.config import RAW_DATA_DIR, VECTOR_STORE_DIR, load_settings
+from src.docurag.loaders import load_documents_from_directory
 
 
 def ensure_directories(paths: list[Path]) -> None:

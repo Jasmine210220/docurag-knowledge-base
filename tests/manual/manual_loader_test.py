@@ -8,7 +8,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.kb_rag.loaders import get_loader
+from src.docurag.loaders import get_loader
 
 
 # 这个脚本是手动测试脚本，不是主业务代码。

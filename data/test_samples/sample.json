@@ -1,5 +1,5 @@
 {
-  "project": "PDF智能知识库",
+  "project": "DocuRAG",
   "stage": "manual loader test",
   "description": "这是一个最小 JSON 测试样本，用于验证 JSONLoader。"
 }

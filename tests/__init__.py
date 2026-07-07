@@ -1,1 +1,1 @@
-"""Test package for kb_rag."""
+"""Test package for DocuRAG."""

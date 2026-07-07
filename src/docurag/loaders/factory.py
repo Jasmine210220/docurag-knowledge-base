@@ -2,8 +2,8 @@ from pathlib import Path
 
 from langchain_core.documents import Document
 
-from src.kb_rag.loaders.base import BaseDocumentLoader
-from src.kb_rag.loaders.file_loaders import (
+from src.docurag.loaders.base import BaseDocumentLoader
+from src.docurag.loaders.file_loaders import (
     CsvDocumentLoader,
     JsonDocumentLoader,
     PdfDocumentLoader,

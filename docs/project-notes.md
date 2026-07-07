@@ -4,7 +4,7 @@
 
 当前仓库实现的内容主要是基础工程结构：
 
-- 建立源码目录 `src/kb_rag/`
+- 建立源码目录 `src/docurag/`
 - 建立数据目录 `data/raw/` 和 `data/vector_store/`
 - 建立配置模板 `.env.example`
 - 实现环境变量加载
@@ -19,7 +19,7 @@
 
 存放项目源码。
 
-当前代码位于 `src/kb_rag/`，后续各功能模块也会继续放在该目录下拆分。
+当前代码位于 `src/docurag/`，后续各功能模块也会继续放在该目录下拆分。
 
 ### `data/raw/`
 
@@ -57,7 +57,7 @@
 
 实际运行时由 `.env` 提供对应值。
 
-### `src/kb_rag/config.py`
+### `src/docurag/config.py`
 
 当前负责以下内容：
 
@@ -74,7 +74,7 @@
 
 ## 程序入口
 
-### `src/kb_rag/main.py`
+### `src/docurag/main.py`
 
 当前入口程序包含三个步骤：
 
@@ -89,7 +89,7 @@
 运行以下命令：
 
 ```powershell
-python -m src.kb_rag.main
+python -m src.docurag.main
 ```
 
 当前预期结果是：

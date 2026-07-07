@@ -1,4 +1,4 @@
-# PDF 智能知识库
+# DocuRAG：多格式文档知识库问答系统
 
 一个本地知识库项目，当前阶段已完成基础工程结构、配置加载、程序入口和文档导入模块，后续将继续补全文本切分、向量索引、检索和问答能力。
 
@@ -44,7 +44,7 @@
 ├── docs/
 │   └── project-notes.md
 ├── src/
-│   └── kb_rag/
+│   └── docurag/
 │       ├── loaders/
 │       │   ├── __init__.py
 │       │   ├── base.py
@@ -73,11 +73,11 @@
   - 存放后续向量索引和相关中间产物
 - `docs/project-notes.md`
   - 记录当前项目结构、模块职责和实现说明
-- `src/kb_rag/loaders/`
+- `src/docurag/loaders/`
   - 存放文档导入模块，包括基类、工厂和各文件类型加载器
-- `src/kb_rag/config.py`
+- `src/docurag/config.py`
   - 负责环境变量加载和基础路径定义
-- `src/kb_rag/main.py`
+- `src/docurag/main.py`
   - 负责程序入口、配置读取、目录检查和文档加载演示
 - `tests/manual/`
   - 存放手动验证脚本
@@ -125,7 +125,7 @@ pip install -r requirements.txt
 ### 4. 运行入口程序
 
 ```powershell
-python -m src.kb_rag.main
+python -m src.docurag.main
 ```
 
 当前入口程序会执行以下操作：
@@ -160,7 +160,7 @@ python tests/manual/manual_loader_test.py
 
 ## 当前代码说明
 
-### `src/kb_rag/config.py`
+### `src/docurag/config.py`
 
 负责：
 
@@ -169,7 +169,7 @@ python tests/manual/manual_loader_test.py
 - 加载 `.env` 配置
 - 生成 `Settings` 配置对象
 
-### `src/kb_rag/loaders/base.py`
+### `src/docurag/loaders/base.py`
 
 负责：
 
@@ -177,7 +177,7 @@ python tests/manual/manual_loader_test.py
 - 统一加载器输入输出接口
 - 统一补充公共元数据
 
-### `src/kb_rag/loaders/factory.py`
+### `src/docurag/loaders/factory.py`
 
 负责：
 
@@ -185,7 +185,7 @@ python tests/manual/manual_loader_test.py
 - 根据文件类型返回对应加载器
 - 提供目录级批量加载入口
 
-### `src/kb_rag/loaders/file_loaders.py`
+### `src/docurag/loaders/file_loaders.py`
 
 负责：
 
@@ -194,7 +194,7 @@ python tests/manual/manual_loader_test.py
 - 实现 CSV 加载
 - 实现 PDF 加载
 
-### `src/kb_rag/main.py`
+### `src/docurag/main.py`
 
 负责：
 
