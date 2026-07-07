@@ -1,0 +1,3 @@
+name,role,description
+Alice,developer,负责验证 CSVLoader 是否能正确读取表格数据
+Bob,tester,负责检查每一行是否会被转换为一个 Document
