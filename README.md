@@ -1,6 +1,6 @@
 # PDF 智能知识库
 
-一个本地知识库项目，当前阶段完成了基础工程结构、配置加载和程序入口，后续将逐步补全文档加载、文本切分、向量索引、检索和问答能力。
+一个本地知识库项目，当前阶段已完成基础工程结构、配置加载、程序入口和文档导入模块，后续将继续补全文本切分、向量索引、检索和问答能力。
 
 ## 当前进度
 
@@ -11,14 +11,27 @@
 - 环境变量配置加载
 - 程序入口建立
 - 数据目录自动检查和创建
+- 文档导入模块
+- 多种文件类型的统一加载入口
+- 手动测试脚本和最小测试样本
 
 当前未完成：
 
-- PDF 和其他文档格式的加载
 - 文本切分
 - 向量化与索引
 - 检索
 - 问答生成
+- 交互接口
+
+## 当前支持的文件类型
+
+当前文档导入模块已支持以下格式：
+
+- `.txt`
+- `.md`
+- `.json`
+- `.csv`
+- `.pdf`
 
 ## 目录结构
 
@@ -26,15 +39,24 @@
 .
 ├── data/
 │   ├── raw/
+│   ├── test_samples/
 │   └── vector_store/
 ├── docs/
 │   └── project-notes.md
 ├── src/
 │   └── kb_rag/
+│       ├── loaders/
+│       │   ├── __init__.py
+│       │   ├── base.py
+│       │   ├── factory.py
+│       │   └── file_loaders.py
 │       ├── config.py
 │       ├── main.py
 │       └── __init__.py
 ├── tests/
+│   └── manual/
+│       ├── __init__.py
+│       └── manual_loader_test.py
 ├── .env.example
 ├── .gitignore
 ├── README.md
@@ -44,17 +66,21 @@
 ## 目录说明
 
 - `data/raw/`
-  - 存放原始文档，例如 PDF、TXT、Markdown、CSV、JSON
+  - 存放原始输入文档，作为主程序当前默认扫描目录
+- `data/test_samples/`
+  - 存放最小测试样本，用于手动验证不同文件类型的加载结果
 - `data/vector_store/`
-  - 存放向量索引和相关中间产物
+  - 存放后续向量索引和相关中间产物
 - `docs/project-notes.md`
   - 记录当前项目结构、模块职责和实现说明
+- `src/kb_rag/loaders/`
+  - 存放文档导入模块，包括基类、工厂和各文件类型加载器
 - `src/kb_rag/config.py`
   - 负责环境变量加载和基础路径定义
 - `src/kb_rag/main.py`
-  - 负责程序入口、配置读取和目录检查
-- `tests/`
-  - 预留测试目录
+  - 负责程序入口、配置读取、目录检查和文档加载演示
+- `tests/manual/`
+  - 存放手动验证脚本
 
 ## 配置说明
 
@@ -106,7 +132,31 @@ python -m src.kb_rag.main
 
 - 加载环境变量
 - 检查 `data/raw` 和 `data/vector_store` 目录
-- 输出当前配置和初始化状态
+- 扫描 `data/raw` 中受支持的文件类型
+- 调用对应加载器读取文档
+- 输出当前加载结果和首条文档预览
+
+## 手动测试
+
+当前提供了一个手动测试脚本，用于逐个验证不同文件类型的加载结果：
+
+```powershell
+python tests/manual/manual_loader_test.py
+```
+
+该脚本会：
+
+- 扫描 `data/test_samples/`
+- 根据文件后缀选择对应加载器
+- 输出每个样本文件返回的 `Document` 数量
+- 打印基础元数据和内容预览
+
+当前仓库已包含最小测试样本：
+
+- `sample.txt`
+- `sample.md`
+- `sample.json`
+- `sample.csv`
 
 ## 当前代码说明
 
@@ -115,9 +165,34 @@ python -m src.kb_rag.main
 负责：
 
 - 定义项目根目录
-- 定义数据目录、原始文档目录、向量目录
+- 定义数据目录、原始文档目录、测试样本目录、向量目录
 - 加载 `.env` 配置
 - 生成 `Settings` 配置对象
+
+### `src/kb_rag/loaders/base.py`
+
+负责：
+
+- 定义文档加载器抽象基类
+- 统一加载器输入输出接口
+- 统一补充公共元数据
+
+### `src/kb_rag/loaders/factory.py`
+
+负责：
+
+- 维护文件后缀到加载器的映射关系
+- 根据文件类型返回对应加载器
+- 提供目录级批量加载入口
+
+### `src/kb_rag/loaders/file_loaders.py`
+
+负责：
+
+- 实现 TXT / MD 文本加载
+- 实现 JSON 加载
+- 实现 CSV 加载
+- 实现 PDF 加载
 
 ### `src/kb_rag/main.py`
 
@@ -125,27 +200,41 @@ python -m src.kb_rag.main
 
 - 调用配置加载函数
 - 确保目录存在
-- 输出当前初始化信息
+- 扫描原始文档目录
+- 调用导入模块并输出当前加载结果
+
+## 依赖说明
+
+当前核心依赖包括：
+
+- `python-dotenv`
+  - 加载环境变量
+- `langchain-core`
+  - 提供 `Document` 数据结构
+- `langchain-community`
+  - 提供文档加载器实现
+- `pypdf`
+  - 提供 PDF 读取能力
 
 ## Git 忽略规则
 
 当前 `.gitignore` 已排除以下内容：
 
 - `.venv/`
+- `.idea/`
 - `__pycache__/`
 - `.env`
 - `data/raw/` 中的真实文档
 - `data/vector_store/` 中的索引和缓存文件
 
-仓库中仅保留目录占位文件 `.gitkeep`，用于保留目录结构。
+`data/test_samples/` 默认忽略，仅保留少量明确列出的最小测试样本。
 
 ## 后续计划
 
 后续预计按以下顺序补充模块：
 
-1. 文档加载
-2. 文本切分
-3. 向量化与索引
-4. 检索
-5. 问答生成
-6. 交互接口
+1. 文本切分
+2. 向量化与索引
+3. 检索
+4. 问答生成
+5. 交互接口
