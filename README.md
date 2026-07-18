@@ -1,111 +1,115 @@
 # DocuRAG：多格式文档知识库问答系统
 
-一个面向多格式文档导入、文本切片、知识库构建与问答流程的本地 RAG 项目。
+这是一个本地 RAG 项目。当前已经完成：
 
-## 当前进度
-
-当前已完成：
-
-- 项目目录初始化
-- Python 包结构初始化
+- 工程化项目结构
+- `src` 布局包配置
 - 环境变量配置加载
-- 程序入口建立
-- 数据目录自动检查和创建
-- 文档导入模块
-- 多种文件类型的统一加载入口
-- 手动测试脚本和最小测试样本
-
-当前未完成：
-
+- 多格式文档加载
 - 文本切分
 - 向量化与索引
-- 检索
-- 问答生成
-- 交互接口
+- 检索模块
+- 最小问答链组装
+- 最小 CLI 交互入口
+- 手工验证脚本
+- 最小自动化测试
 
-## 当前支持的文件类型
+当前还未完成：
 
-当前文档导入模块已支持以下格式：
+- 问答效果优化
+- 更完整的交互产品形态（如 Web / GUI）
 
-- `.txt`
-- `.md`
-- `.json`
-- `.csv`
-- `.pdf`
+## 当前技术路线
 
-## 目录结构
+- 文档加载：LangChain 常见 loader 生态
+- 文本切分：`RecursiveCharacterTextSplitter`
+- Embedding：`DashScopeEmbeddings`
+- 向量库：`Chroma`
+- 检索：基于 Chroma 的相似度检索
+- 问答链：LangChain 经典 retrieval chain
+- 配置加载：`python-dotenv`
+- JSON 依赖：`jq`
+
+## 当前目录结构
 
 ```text
 .
-├── data/
-│   ├── raw/
-│   ├── test_samples/
-│   └── vector_store/
-├── docs/
-│   └── project-notes.md
-├── src/
-│   └── docurag/
-│       ├── loaders/
-│       │   ├── __init__.py
-│       │   ├── base.py
-│       │   ├── factory.py
-│       │   └── file_loaders.py
-│       ├── config.py
-│       ├── main.py
-│       └── __init__.py
-├── tests/
-│   └── manual/
-│       ├── __init__.py
-│       └── manual_loader_test.py
-├── .env.example
-├── .gitignore
-├── README.md
-└── requirements.txt
+|-- data/
+|   |-- raw/
+|   |-- test_samples/
+|   |-- test_vector_store/
+|   `-- vector_store/
+|-- docs/
+|   `-- project-notes.md
+|-- src/
+|   `-- docurag/
+|       |-- chat_models/
+|       |-- loaders/
+|       |-- processors/
+|       |-- qa/
+|       |-- retrievers/
+|       |-- vectorstores/
+|       |-- __init__.py
+|       |-- cli.py
+|       |-- config.py
+|       `-- main.py
+|-- tests/
+|   |-- manual/
+|   |-- __init__.py
+|   |-- test_builders.py
+|   |-- test_cli.py
+|   |-- test_config.py
+|   |-- test_loaders.py
+|   |-- test_qa.py
+|   |-- test_retriever.py
+|   `-- test_splitter.py
+|-- .env.example
+|-- .gitignore
+|-- pyproject.toml
+|-- requirements.txt
+`-- README.md
 ```
-
-## 目录说明
-
-- `data/raw/`
-  - 存放原始输入文档，作为主程序当前默认扫描目录
-- `data/test_samples/`
-  - 存放最小测试样本，用于手动验证不同文件类型的加载结果
-- `data/vector_store/`
-  - 存放后续向量索引和相关中间产物
-- `docs/project-notes.md`
-  - 记录当前项目结构、模块职责和实现说明
-- `src/docurag/loaders/`
-  - 存放文档导入模块，包括基类、工厂和各文件类型加载器
-- `src/docurag/config.py`
-  - 负责环境变量加载和基础路径定义
-- `src/docurag/main.py`
-  - 负责程序入口、配置读取、目录检查和文档加载演示
-- `tests/manual/`
-  - 存放手动验证脚本
 
 ## 配置说明
 
-项目通过 `.env` 加载运行配置，示例模板如下：
+项目当前将聊天模型配置和向量模型配置拆开管理，位于 [src/docurag/config.py](/C:/Users/12142/Documents/DocuRAG/src/docurag/config.py)。
+
+`.env.example` 当前结构如下：
 
 ```env
-OPENAI_API_KEY=your_api_key_here
-EMBEDDING_MODEL=text-embedding-3-small
-CHAT_MODEL=gpt-4.1-mini
+DASHSCOPE_API_KEY=your_dashscope_api_key_here
+
+CHAT_MODEL_PROVIDER=dashscope
+CHAT_MODEL=qwen-max
+CHAT_API_KEY=
+
+EMBEDDING_PROVIDER=dashscope
+EMBEDDING_MODEL=text-embedding-v1
+EMBEDDING_API_KEY=
+
+VECTOR_STORE_PROVIDER=chroma
+VECTOR_COLLECTION_NAME=docurag_documents
+VECTOR_STORE_DIR=
 ```
 
-当前配置项作用如下：
+默认行为：
 
-- `OPENAI_API_KEY`
-  - OpenAI 接口密钥
-- `EMBEDDING_MODEL`
-  - 向量化模型名称
-- `CHAT_MODEL`
-  - 问答模型名称
+- 聊天模型默认是 `qwen-max`
+- embedding 模型默认是 `text-embedding-v1`
+- 向量库存储目录默认是 `data/vector_store/`
 
-`.env.example` 用于提供模板，`.env` 不应提交到仓库。
+你可以直接使用默认配置，也可以通过环境变量覆盖。
 
-## 安装与运行
+## 安装方式
 
-### 1. 创建虚拟环境
+当前仓库中：
+
+- `requirements.txt` 负责运行依赖和当前测试依赖
+- `pyproject.toml` 负责把 `src/` 布局安装成可导入包
+
+因此当前最一致的安装顺序是：
+
+### 1. 创建并激活虚拟环境
 
 ```powershell
 python -m venv .venv
@@ -115,126 +119,164 @@ python -m venv .venv
 ### 2. 安装依赖
 
 ```powershell
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
-### 3. 创建配置文件
-
-根据 `.env.example` 创建 `.env` 文件，并填写实际配置。
-
-### 4. 运行入口程序
+### 3. 安装本地包
 
 ```powershell
-python -m src.docurag.main
+python -m pip install -e .
 ```
 
-当前入口程序会执行以下操作：
+说明：
 
-- 加载环境变量
-- 检查 `data/raw` 和 `data/vector_store` 目录
-- 扫描 `data/raw` 中受支持的文件类型
-- 调用对应加载器读取文档
-- 输出当前加载结果和首条文档预览
+- 第 2 步负责安装 LangChain、Chroma、DashScope、`jq`、`pytest` 等依赖
+- 第 3 步负责让 `docurag` 包在当前环境中可直接导入
 
-## 手动测试
+## 运行方式
 
-当前提供了一个手动测试脚本，用于逐个验证不同文件类型的加载结果：
+### 工程初始化 / 加载预览入口
+
+```powershell
+python -m docurag.main
+```
+
+`docurag.main` 当前定位为：
+
+- 工程初始化入口
+- 文档加载预览入口
+
+它当前会：
+
+- 读取环境变量配置
+- 检查 `data/raw/` 和向量目录
+- 扫描 `data/raw/` 中受支持文件
+- 调用文档加载模块
+- 打印当前加载结果和失败文件信息
+
+说明：
+
+- 它当前不会自动执行切分、向量入库、检索或问答演示
+- 这条入口保持轻量，不承担交互问答职责
+
+### CLI 最小交互入口
+
+单次提问模式：
+
+```powershell
+python -m docurag.cli --question "What is DocuRAG?"
+```
+
+交互循环模式：
+
+```powershell
+python -m docurag.cli --interactive
+```
+
+可选参数：
+
+```powershell
+python -m docurag.cli --question "What is DocuRAG?" --top-k 2
+```
+
+说明：
+
+- CLI 会复用现有的 embedding、Chroma、retriever、chat model 和 QA chain
+- CLI 默认直接使用当前正式向量目录和集合配置
+- CLI 不会自动重建索引，它假设你已经先完成向量入库
+- 如果当前集合里没有文档，CLI 会直接给出明确提示
+- 单次提问模式下如果真实问答调用失败，CLI 会打印错误并返回非 0 退出码
+- 交互循环模式下如果某次问答失败，CLI 会提示错误并继续等待下一次输入
+- `Ctrl+C` 或 EOF 会让交互循环正常结束，不抛出堆栈
+
+## 问答模块当前状态
+
+当前问答模块已经具备：
+
+- 可导入
+- 可组装真实 `build_qa_chain()`
+- 可通过不依赖外部 API 的自动化测试完成最小链路验证
+
+当前这不表示：
+
+- 问答效果已经优化完成
+- 已经具备完整产品级问答体验
+
+## 手工验证脚本
+
+文档加载验证：
 
 ```powershell
 python tests/manual/manual_loader_test.py
 ```
 
-该脚本会：
+文本切分验证：
 
-- 扫描 `data/test_samples/`
-- 根据文件后缀选择对应加载器
-- 输出每个样本文件返回的 `Document` 数量
-- 打印基础元数据和内容预览
+```powershell
+python tests/manual/manual_splitter_test.py
+```
 
-当前仓库已包含最小测试样本：
+向量入库最小验证：
 
-- `sample.txt`
-- `sample.md`
-- `sample.json`
-- `sample.csv`
+```powershell
+python tests/manual/manual_vector_index_test.py
+```
 
-## 当前代码说明
+检索最小验证：
 
-### `src/docurag/config.py`
+```powershell
+python tests/manual/manual_retriever_test.py
+```
 
-负责：
+问答最小验证：
 
-- 定义项目根目录
-- 定义数据目录、原始文档目录、测试样本目录、向量目录
-- 加载 `.env` 配置
-- 生成 `Settings` 配置对象
+```powershell
+python tests/manual/manual_qa_test.py
+```
 
-### `src/docurag/loaders/base.py`
+说明：
 
-负责：
+- 手工脚本不污染主入口
+- 手工向量入库脚本每次运行前会重置测试向量目录中的已有测试索引内容，但保留 `.gitkeep`
+- 检索和问答脚本当前使用保守前置检查：
+  - 测试向量目录中存在非占位内容
+  - 当前测试集合通过公开接口可读取到至少一条已存文档
+- 这比只检查目录存在更可靠，但仍不等于完整的底层 Chroma 健康检查
+- 正式向量目录仍然是 `data/vector_store/`
 
-- 定义文档加载器抽象基类
-- 统一加载器输入输出接口
-- 统一补充公共元数据
+## 最小自动化测试
 
-### `src/docurag/loaders/factory.py`
+当前自动化测试包括：
 
-负责：
+- `tests/test_builders.py`
+  - 验证聊天模型构造器和 embedding 构造器的基础异常行为
+- `tests/test_cli.py`
+  - 验证 CLI 单次提问模式的最小链路装配和前置检查
+- `tests/test_config.py`
+  - 验证 `load_settings()` 默认值和环境变量覆盖行为
+- `tests/test_loaders.py`
+  - 验证 `get_loader()` 的后缀分发
+- `tests/test_splitter.py`
+  - 验证 `split_documents()` 是否保留 metadata 并补充 `chunk_index`
+- `tests/test_retriever.py`
+  - 验证检索模块是否返回与 query 更相关的文档
+- `tests/test_qa.py`
+  - 直接覆盖真实 `build_qa_chain()` 的最小可组装链路
 
-- 维护文件后缀到加载器的映射关系
-- 根据文件类型返回对应加载器
-- 提供目录级批量加载入口
+默认自动化测试入口：
 
-### `src/docurag/loaders/file_loaders.py`
+```powershell
+python -m pytest -q
+```
 
-负责：
+说明：
 
-- 实现 TXT / MD 文本加载
-- 实现 JSON 加载
-- 实现 CSV 加载
-- 实现 PDF 加载
+- 默认 `pytest` 收集当前只面向 `tests/test_*.py`
+- `tests/manual/` 下的脚本定位仍然是手工验证脚本，不参与默认自动化收集
+- 手工脚本需要按文件单独执行
 
-### `src/docurag/main.py`
+运行方式：
 
-负责：
-
-- 调用配置加载函数
-- 确保目录存在
-- 扫描原始文档目录
-- 调用导入模块并输出当前加载结果
-
-## 依赖说明
-
-当前核心依赖包括：
-
-- `python-dotenv`
-  - 加载环境变量
-- `langchain-core`
-  - 提供 `Document` 数据结构
-- `langchain-community`
-  - 提供文档加载器实现
-- `pypdf`
-  - 提供 PDF 读取能力
-
-## Git 忽略规则
-
-当前 `.gitignore` 已排除以下内容：
-
-- `.venv/`
-- `.idea/`
-- `__pycache__/`
-- `.env`
-- `data/raw/` 中的真实文档
-- `data/vector_store/` 中的索引和缓存文件
-
-`data/test_samples/` 默认忽略，仅保留少量明确列出的最小测试样本。
-
-## 后续计划
-
-后续预计按以下顺序补充模块：
-
-1. 文本切分
-2. 向量化与索引
-3. 检索
-4. 问答生成
-5. 交互接口
+```powershell
+python -m pytest tests/test_builders.py tests/test_cli.py tests/test_config.py tests/test_loaders.py tests/test_splitter.py tests/test_retriever.py tests/test_qa.py
+```
