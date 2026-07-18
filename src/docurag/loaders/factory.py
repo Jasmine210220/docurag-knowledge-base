@@ -1,9 +1,10 @@
+from dataclasses import dataclass
 from pathlib import Path
 
 from langchain_core.documents import Document
 
-from src.docurag.loaders.base import BaseDocumentLoader
-from src.docurag.loaders.file_loaders import (
+from docurag.loaders.base import BaseDocumentLoader
+from docurag.loaders.file_loaders import (
     CsvDocumentLoader,
     JsonDocumentLoader,
     PdfDocumentLoader,
@@ -11,7 +12,6 @@ from src.docurag.loaders.file_loaders import (
 )
 
 
-# 用一个映射表统一管理“后缀名 -> 对应加载器”的关系
 LOADER_MAPPING: dict[str, type[BaseDocumentLoader]] = {
     ".txt": TextDocumentLoader,
     ".md": TextDocumentLoader,
@@ -19,6 +19,12 @@ LOADER_MAPPING: dict[str, type[BaseDocumentLoader]] = {
     ".csv": CsvDocumentLoader,
     ".pdf": PdfDocumentLoader,
 }
+
+
+@dataclass
+class DirectoryLoadResult:
+    documents: list[Document]
+    failed_files: list[tuple[str, Exception]]
 
 
 def get_loader(file_path: Path) -> BaseDocumentLoader:
@@ -31,23 +37,27 @@ def get_loader(file_path: Path) -> BaseDocumentLoader:
     return loader_class(file_path)
 
 
-def load_documents_from_directory(directory: Path) -> list[Document]:
+def load_documents_from_directory(directory: Path) -> DirectoryLoadResult:
     documents: list[Document] = []
+    failed_files: list[tuple[str, Exception]] = []
 
-    # 扫描目录下的所有文件，并按文件类型分发给对应加载器
     for file_path in sorted(directory.iterdir()):
         if not file_path.is_file():
             continue
 
-        # 跳过 .gitkeep 这类目录占位文件，避免把非业务文件当成文档处理
         if file_path.name.startswith("."):
             continue
 
-        # 当前还不支持的文件类型先直接跳过，避免整个流程因为单个文件中断
         if file_path.suffix.lower() not in LOADER_MAPPING:
             continue
 
-        loader = get_loader(file_path)
-        documents.extend(loader.load())
+        try:
+            loader = get_loader(file_path)
+            documents.extend(loader.load())
+        except Exception as error:
+            failed_files.append((file_path.name, error))
 
-    return documents
+    return DirectoryLoadResult(
+        documents=documents,
+        failed_files=failed_files,
+    )
